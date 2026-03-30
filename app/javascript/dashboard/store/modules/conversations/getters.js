@@ -15,9 +15,23 @@ export const getSelectedChatConversation = ({
   allConversations.filter(conversation => conversation.id === selectedChatId);
 
 const getters = {
-  getAllConversations: ({ allConversations, chatSortFilter: sortKey }) => {
-    return allConversations.sort((a, b) => sortComparator(a, b, sortKey));
-  },
+  getAllConversations: ({ allConversations, chatSortFilter: sortKey }, _, _rootState, rootGetters) => {
+      const currentUser = rootGetters.getCurrentUser;
+      
+      let chats = allConversations;
+
+      // Filtro visual para que el agente solo vea lo suyo
+      if (currentUser && currentUser.role === 'agent') {
+        chats = allConversations.filter(chat => 
+          chat.meta && 
+          chat.meta.assignee && 
+          chat.meta.assignee.id === currentUser.id
+        );
+      }
+      
+      // Mantenemos el orden original de Chatwoot
+      return chats.sort((a, b) => sortComparator(a, b, sortKey));
+    },
   getFilteredConversations: (
     { allConversations, chatSortFilter, appliedFilters },
     _,
