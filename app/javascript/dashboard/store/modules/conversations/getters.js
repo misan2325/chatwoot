@@ -32,8 +32,6 @@ const getters = {
       return chats.sort((a, b) => sortComparator(a, b, sortKey));
     },
 
-  // --- CANDADO AFS COLOMBIA PARA CARPETAS Y FILTROS ---
-  // Esta era la fuga: Las carpetas personalizadas usaban este motor libre.
   getFilteredConversations: (
     { allConversations, chatSortFilter, appliedFilters },
     _,
@@ -42,19 +40,12 @@ const getters = {
   ) => {
     const currentUser = rootGetters.getCurrentUser;
 
-    // Si es agente, bloqueamos el filtro y lo obligamos a ver SOLO lo suyo.
+    // BLOQUEO AFS: Si es agente, no le entregamos NADA por la vía de filtros/bandejas globales
     if (currentUser && currentUser.role === 'agent') {
-      const currentUserId = currentUser.id;
-      return allConversations
-        .filter(conversation => {
-          const isAssignedToMe = conversation.meta && conversation.meta.assignee && conversation.meta.assignee.id === currentUserId;
-          const matchesFilterResult = matchesFilters(conversation, appliedFilters);
-          return isAssignedToMe && matchesFilterResult;
-        })
-        .sort((a, b) => sortComparator(a, b, chatSortFilter));
+      return [];
     }
 
-    // Lógica original para Administradores (pueden ver todo el filtro)
+    // Lógica normal solo para administradores
     const currentUserId = currentUser.id;
     const currentAccountId = rootGetters.getCurrentAccountId;
     const permissions = getUserPermissions(currentUser, currentAccountId);
@@ -62,17 +53,8 @@ const getters = {
 
     return allConversations
       .filter(conversation => {
-        const matchesFilterResult = matchesFilters(
-          conversation,
-          appliedFilters
-        );
-        const allowedForRole = applyRoleFilter(
-          conversation,
-          userRole,
-          permissions,
-          currentUserId
-        );
-
+        const matchesFilterResult = matchesFilters(conversation, appliedFilters);
+        const allowedForRole = applyRoleFilter(conversation, userRole, permissions, currentUserId);
         return matchesFilterResult && allowedForRole;
       })
       .sort((a, b) => sortComparator(a, b, chatSortFilter));
