@@ -176,3 +176,11 @@ export default {
     </main>
   </div>
 </template>
+<style>
+/* --- CAMUFLAJE VISUAL PARA AGENTES --- */
+/* Oculta el contador de chats en las pestañas 'Sin asignar' y 'Todos' */
+body.agent .conversations-tabs button:nth-child(2) .badge,
+body.agent .conversations-tabs button:nth-child(3) .badge {
+  display: none !important;
+}
+</style>
