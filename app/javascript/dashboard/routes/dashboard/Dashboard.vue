@@ -176,33 +176,36 @@ export default {
     </main>
   </div>
 </template>
+
 <style>
-/* --- CLAUSURA TOTAL DE SECCIONES NO DESEADAS (AFS COLOMBIA) --- */
+/* --- CLAUSURA TOTAL (COMPATIBLE CON CHATWOOT NEXT UI / V3) --- */
 
-/* 1. Ocultar el icono superior de "Mi bandeja de entrada" en la barra lateral */
-body.agent .sidebar-wrapper li:first-child,
-body.agent aside .flex-column > a:first-child {
+/* 1. Ocultar "Bandejas de entrada" (Inboxes) del menú lateral (Ej. Mi bandeja de entrada) */
+body.agent a[href*="/inbox/"] {
   display: none !important;
 }
 
-/* 2. Ocultar la sección de "Carpetas" y "Etiquetas" del menú lateral por si acaso */
-body.agent .sidebar-group:has(h3), 
-body.agent .sidebar-item[title*="Inbox"],
-body.agent .sidebar-item[title*="bandeja"] {
+/* 2. Ocultar "Vistas Personalizadas" y "Menciones" del menú lateral */
+body.agent a[href*="/custom_view/"],
+body.agent a[href*="/mentions/"] {
   display: none !important;
 }
 
-/* 3. Bloqueo de seguridad visual en la lista de chats */
-body.agent .conversations-list .conversation {
+/* 3. Ocultar las pestañas de "Todos" y "Sin asignar" (Nueva Interfaz) */
+body.agent a[href$="/all"],
+body.agent a[href$="/all/"],
+body.agent a[href$="/unassigned"],
+body.agent a[href$="/unassigned/"] {
   display: none !important;
 }
 
-/* 4. MOSTRAR tarjetas SOLO cuando están en la pestaña "Mías" */
-body.agent:has(.conversations-tabs button:first-child.active) .conversations-list .conversation {
-  display: flex !important;
+/* 4. Ocultar las pestañas en la interfaz Clásica (Seguridad de respaldo) */
+body.agent .conversations-tabs button:nth-child(2),
+body.agent .conversations-tabs button:nth-child(3) {
+  display: none !important;
 }
 
-/* 5. Eliminar todos los numeritos (Badges) de la interfaz para agentes */
+/* 5. Destruir cualquier contador numérico (Badges) residual */
 body.agent .badge, 
 body.agent .unread-count {
   display: none !important;
