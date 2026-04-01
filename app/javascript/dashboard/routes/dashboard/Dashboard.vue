@@ -177,10 +177,34 @@ export default {
   </div>
 </template>
 <style>
-/* --- CAMUFLAJE VISUAL PARA AGENTES --- */
-/* Oculta el contador de chats en las pestañas 'Sin asignar' y 'Todos' */
+/* --- BLINDAJE DE BANDEJA PARA AGENTES (AFS COLOMBIA) --- */
+
+/* 1. Bloqueo de entrada a chats (Seguridad base) */
+body.agent .conversation-details, 
+body.agent .hide-focused-conversation {
+  display: none !important;
+}
+
+/* 2. Ocultar TODAS las tarjetas de la lista por defecto para los agentes */
+body.agent .conversations-list .conversation {
+  display: none !important;
+}
+
+/* 3. MOSTRAR tarjetas SOLO cuando el agente está en su pestaña 'Mías' */
+body.agent:has(.conversations-tabs button:first-child.active) .conversations-list .conversation {
+  display: flex !important;
+}
+
+/* 4. Ocultar los contadores en las pestañas centrales */
 body.agent .conversations-tabs button:nth-child(2) .badge,
 body.agent .conversations-tabs button:nth-child(3) .badge {
+  display: none !important;
+}
+
+/* 5. NUEVO: Ocultar los contadores en toda la barra lateral izquierda (Carpetas, Etiquetas) */
+body.agent aside .badge,
+body.agent .sidebar-wrapper .badge,
+body.agent .left-sidebar .badge {
   display: none !important;
 }
 </style>
