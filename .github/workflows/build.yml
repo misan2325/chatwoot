@@ -26,4 +26,5 @@ jobs:
         with:
           context: .
           push: true
+          file: docker/Dockerfile
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/chatwoot-afs:latest
