@@ -20,7 +20,7 @@ const getters = {
       
       let chats = allConversations;
 
-      // Filtro visual para que el agente solo vea lo suyo
+      // Filtro de seguridad principal AFS: Los agentes solo pueden cargar sus chats en la lista global
       if (currentUser && currentUser.role === 'agent') {
         chats = allConversations.filter(chat => 
           chat.meta && 
@@ -29,7 +29,6 @@ const getters = {
         );
       }
       
-      // Mantenemos el orden original de Chatwoot
       return chats.sort((a, b) => sortComparator(a, b, sortKey));
     },
   getFilteredConversations: (
@@ -99,7 +98,6 @@ const getters = {
     });
   },
   getAppliedConversationFiltersV2: _state => {
-    // TODO: Replace existing one with V2 after migrating the filters to use camelcase
     return _state.appliedFilters.map(camelcaseKeys);
   },
   getAppliedConversationFilters: _state => {
@@ -109,16 +107,33 @@ const getters = {
     const hasAppliedFilters = _state.appliedFilters.length !== 0;
     return hasAppliedFilters ? filterQueryGenerator(_state.appliedFilters) : [];
   },
-  getUnAssignedChats: _state => activeFilters => {
+  
+  // AFS COLOMBIA: Vaciamos la pestaña 'Sin Asignar' para agentes
+  getUnAssignedChats: (_state, _, __, rootGetters) => activeFilters => {
+    const currentUser = rootGetters.getCurrentUser;
+    
+    // Si es agente, retornamos un arreglo vacío de inmediato.
+    if (currentUser && currentUser.role === 'agent') {
+      return [];
+    }
+
     return _state.allConversations.filter(conversation => {
       const isUnAssigned = !conversation.meta.assignee;
       const shouldFilter = applyPageFilters(conversation, activeFilters);
       return isUnAssigned && shouldFilter;
     });
   },
+  
+  // AFS COLOMBIA: Vaciamos la pestaña 'Todos' para agentes
   getAllStatusChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUser = rootGetters.getCurrentUser;
-    const currentUserId = rootGetters.getCurrentUser.id;
+    
+    // Si es agente, retornamos un arreglo vacío de inmediato.
+    if (currentUser && currentUser.role === 'agent') {
+      return [];
+    }
+
+    const currentUserId = currentUser.id;
     const currentAccountId = rootGetters.getCurrentAccountId;
 
     const permissions = getUserPermissions(currentUser, currentAccountId);
