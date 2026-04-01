@@ -177,34 +177,34 @@ export default {
   </div>
 </template>
 <style>
-/* --- BLINDAJE DE BANDEJA PARA AGENTES (AFS COLOMBIA) --- */
+/* --- CLAUSURA TOTAL DE SECCIONES NO DESEADAS (AFS COLOMBIA) --- */
 
-/* 1. Bloqueo de entrada a chats (Seguridad base) */
-body.agent .conversation-details, 
-body.agent .hide-focused-conversation {
+/* 1. Ocultar el icono superior de "Mi bandeja de entrada" en la barra lateral */
+body.agent .sidebar-wrapper li:first-child,
+body.agent aside .flex-column > a:first-child {
   display: none !important;
 }
 
-/* 2. Ocultar TODAS las tarjetas de la lista por defecto para los agentes */
+/* 2. Ocultar la sección de "Carpetas" y "Etiquetas" del menú lateral por si acaso */
+body.agent .sidebar-group:has(h3), 
+body.agent .sidebar-item[title*="Inbox"],
+body.agent .sidebar-item[title*="bandeja"] {
+  display: none !important;
+}
+
+/* 3. Bloqueo de seguridad visual en la lista de chats */
 body.agent .conversations-list .conversation {
   display: none !important;
 }
 
-/* 3. MOSTRAR tarjetas SOLO cuando el agente está en su pestaña 'Mías' */
+/* 4. MOSTRAR tarjetas SOLO cuando están en la pestaña "Mías" */
 body.agent:has(.conversations-tabs button:first-child.active) .conversations-list .conversation {
   display: flex !important;
 }
 
-/* 4. Ocultar los contadores en las pestañas centrales */
-body.agent .conversations-tabs button:nth-child(2) .badge,
-body.agent .conversations-tabs button:nth-child(3) .badge {
-  display: none !important;
-}
-
-/* 5. NUEVO: Ocultar los contadores en toda la barra lateral izquierda (Carpetas, Etiquetas) */
-body.agent aside .badge,
-body.agent .sidebar-wrapper .badge,
-body.agent .left-sidebar .badge {
+/* 5. Eliminar todos los numeritos (Badges) de la interfaz para agentes */
+body.agent .badge, 
+body.agent .unread-count {
   display: none !important;
 }
 </style>
