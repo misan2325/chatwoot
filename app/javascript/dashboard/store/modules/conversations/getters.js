@@ -17,10 +17,10 @@ export const getSelectedChatConversation = ({
 const getters = {
   getAllConversations: ({ allConversations, chatSortFilter: sortKey }, _, _rootState, rootGetters) => {
       const currentUser = rootGetters.getCurrentUser;
-      
+
       let chats = allConversations;
 
-      // Filtro de seguridad principal AFS: Los agentes solo pueden cargar sus chats en la lista global
+      // Candado principal
       if (currentUser && currentUser.role === 'agent') {
         chats = allConversations.filter(chat => 
           chat.meta && 
@@ -31,6 +31,9 @@ const getters = {
       
       return chats.sort((a, b) => sortComparator(a, b, sortKey));
     },
+
+  // --- CANDADO AFS COLOMBIA PARA CARPETAS Y FILTROS ---
+  // Esta era la fuga: Las carpetas personalizadas usaban este motor libre.
   getFilteredConversations: (
     { allConversations, chatSortFilter, appliedFilters },
     _,
@@ -38,9 +41,22 @@ const getters = {
     rootGetters
   ) => {
     const currentUser = rootGetters.getCurrentUser;
-    const currentUserId = rootGetters.getCurrentUser.id;
-    const currentAccountId = rootGetters.getCurrentAccountId;
 
+    // Si es agente, bloqueamos el filtro y lo obligamos a ver SOLO lo suyo.
+    if (currentUser && currentUser.role === 'agent') {
+      const currentUserId = currentUser.id;
+      return allConversations
+        .filter(conversation => {
+          const isAssignedToMe = conversation.meta && conversation.meta.assignee && conversation.meta.assignee.id === currentUserId;
+          const matchesFilterResult = matchesFilters(conversation, appliedFilters);
+          return isAssignedToMe && matchesFilterResult;
+        })
+        .sort((a, b) => sortComparator(a, b, chatSortFilter));
+    }
+
+    // Lógica original para Administradores (pueden ver todo el filtro)
+    const currentUserId = currentUser.id;
+    const currentAccountId = rootGetters.getCurrentAccountId;
     const permissions = getUserPermissions(currentUser, currentAccountId);
     const userRole = getUserRole(currentUser, currentAccountId);
 
@@ -61,6 +77,7 @@ const getters = {
       })
       .sort((a, b) => sortComparator(a, b, chatSortFilter));
   },
+
   getSelectedChat: ({ selectedChatId, allConversations }) => {
     const selectedChat = allConversations.find(
       conversation => conversation.id === selectedChatId
@@ -108,11 +125,9 @@ const getters = {
     return hasAppliedFilters ? filterQueryGenerator(_state.appliedFilters) : [];
   },
   
-  // AFS COLOMBIA: Vaciamos la pestaña 'Sin Asignar' para agentes
   getUnAssignedChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUser = rootGetters.getCurrentUser;
     
-    // Si es agente, retornamos un arreglo vacío de inmediato.
     if (currentUser && currentUser.role === 'agent') {
       return [];
     }
@@ -124,11 +139,9 @@ const getters = {
     });
   },
   
-  // AFS COLOMBIA: Vaciamos la pestaña 'Todos' para agentes
   getAllStatusChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUser = rootGetters.getCurrentUser;
     
-    // Si es agente, retornamos un arreglo vacío de inmediato.
     if (currentUser && currentUser.role === 'agent') {
       return [];
     }
